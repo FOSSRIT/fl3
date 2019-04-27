@@ -28,7 +28,7 @@ class LetterBorder extends React.Component {
     
       handleChange = (color) => {
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', "http://laptop.ewitherington.me:8000", true);
+        xhr.open('POST', "http://localhost:8000", true);
         xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
         xhr.send(JSON.stringify({
             "letter": this.props.id,  //replace with active letter
