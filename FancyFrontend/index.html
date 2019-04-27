@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <script type="text/javascript">
+            const COLOR_CHANGE_SERVER = "http://laptop.ewitherington.me:8000";
+        </script>
+        <meta charset="utf-8">
+        <!-- Enable Mobile Sizing -->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>It's FOSS!</title>
+        <link rel="stylesheet" href="./master.css">
+        <script src="iro.min.js"></script>
+    </head>
+    <body>
+        <div class="page">
+            <div class="col col1">
+                <span id="l0" onclick="clock(this)" class="letter active">F</span>
+                <span id="l1" onclick="clock(this)" class="letter">O</span>
+                <span id="l2" onclick="clock(this)" class="letter">S</span>
+                <span id="l3" onclick="clock(this)" class="letter">S</span>
+            </div>
+            <div class="col col2">
+                <div class="wheel" id="colorWheelDemo"></div>
+            </div>
+        </div>
+        <script type="text/javascript">
+
+            let colorMap = {
+                "l0": [255,0,255],
+                "l1": [255,255,0],
+                "l2": [0,255,255],
+                "l3": [0,255,0],
+            };
+
+            let colorWheel;
+            let currentlySelected = "l0";
+            let gateOpen = true;
+
+            const clock = (selected)=>{
+                for(let element of document.getElementsByClassName("letter")){
+                    element.classList.remove('active');
+                }
+                selected.classList.add("active");
+                let id = selected.getAttribute("id");
+                currentlySelected = id;
+                colorWheel.color.set({
+                    r: colorMap[id][0],
+                    g: colorMap[id][1],
+                    b: colorMap[id][2],
+                });
+
+            };
+
+            let closeGate = () => {
+                gateOpen = false;
+                setTimeout(()=>{gateOpen = true}, 50);
+            };
+
+            window.onload = function(){
+                colorWheel = iro.ColorPicker("#colorWheelDemo", {
+                    width: 300,
+                    //color: '#fff',
+                    //padding: 6,
+                    borderWidth: 0,
+                    //borderColor: '#fff',
+                    handleRadius: 8,
+                    //handleSvg: null, // Custom handle SVG
+                    handleOrigin: {
+                      x: 0,
+                      y: 0
+                    },
+                    wheelLightness: false,
+                    //sliderMargin: 12,
+                    display: 'block', // CSS display value
+                    //layout: {} // Custom Layouts
+                });
+                colorWheel.on('color:change', (color, changes)=>{
+                    let letter = document.getElementById(currentlySelected);
+                    letter.style.color = color.hexString;
+                    let rgb = color.rgb;
+                    colorMap[currentlySelected] = [rgb.r,rgb.g,rgb.b];
+                    if(gateOpen){
+                        closeGate();
+                        send(currentlySelected.replace("l", ''), rgb.r, rgb.g, rgb.b)
+                    }
+                });
+            };
+
+            function send(letter, r, g, b){
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', COLOR_CHANGE_SERVER, true);
+                xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+                xhr.send(JSON.stringify({
+                    "letter": letter,
+                    "red": r,
+                    "green": g,
+                    "blue": b
+                }));
+            }
+        </script>
+    </body>
+</html>
